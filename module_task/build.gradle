@@ -1,0 +1,105 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+/**
+ * doLast 的快捷写法
+ */
+task hello << {
+    println "Hello"
+}
+
+/**
+ * 任务依赖
+ * 在加入一个依赖之前, 这个依赖的任务不需要提前定义
+ */
+task world(dependsOn: hello) << {
+    println "World"
+}
+
+/**
+ * 排除任务
+ */
+// 排除hello任务的执行
+// 命令行执行：gradlew -q world -x hello
+
+/**
+ * 动态创建任务
+ */
+4.times { counter ->
+    task "task${counter}" << {
+        println "I am task number ${counter}"
+    }
+}
+task0.dependsOn(task2, task3)
+
+/**
+ * 任务执行顺序
+ * doFirst 和 doLast 可以被执行许多次. 他们分别可以在任务动作列表的开始和结束加入动作.
+ * 当任务执行的时候, 在动作列表里的动作将被按顺序执行. 这里第四个行为中 << 操作符是 doLast 的简单别称.
+ */
+task order << {
+    println '222'
+}
+order.doFirst {
+    println '111'
+}
+order.doLast {
+    println '333'
+}
+order << {
+    println '444'
+}
+
+/**
+ * 任务短标记
+ */
+task getTaskName << {
+    println "getTaskName : ${order.name}"
+}
+
+/**
+ * 任务自定义属性
+ */
+task property {
+    ext.myProperty = "myValue"
+}
+
+task printProperties << {
+    println property.myProperty
+}
+
+/**
+ * 默认任务
+ */
+task defaultTask {
+    println '*** DsGradle Begin ***'
+}
+defaultTasks 'defaultTask'
+
+/**
+ * DAG
+ */
+task distribution << {
+    // We build the zip with version=1.0-SNAPSHOT
+    println "We build the zip with version=$version"
+}
+
+task release(dependsOn: 'distribution') << {
+    // We build the zip with version=1.0
+    // We release now
+    println 'We release now'
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = '1.0'
+    } else {
+        version = '1.0-SNAPSHOT'
+    }
+}

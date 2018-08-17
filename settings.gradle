@@ -1,0 +1,1 @@
+include ':app', ':module_task', ':module_dependency', ':module_file'

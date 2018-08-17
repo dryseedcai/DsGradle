@@ -1,0 +1,100 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+/**
+ * 生成文件
+ */
+task genFile << {
+    //使用一个相对路径
+    //File configFile = file('src/config.xml')
+    //使用一个项目路径的文件对象
+    File configFile = file(new File('src/config.xml'))
+    println configFile.absolutePath
+    if (!configFile.exists()) {
+        configFile.createNewFile()
+    }
+}
+
+/**
+ * 遍历文件
+ */
+task listFiles << {
+    def collection = files {
+        file('src').listFiles()
+    }
+    collection.collect { relativePath(it) }.sort().each { println it }
+}
+
+/**
+ *  FileTree
+ */
+task fileTree << {
+    FileTree tree1 = fileTree(dir: 'src')
+    tree1.include '**/*.java'
+    tree1.each { File file ->
+        println file
+    }
+    println()
+    FileTree tree2 = fileTree('src') {
+        exclude '**/*.java'
+    }
+    tree2.each { File file ->
+        println file
+    }
+}
+
+/**
+ * 复制文件
+ */
+task copy(type: Copy, group: "Custom", description: "Copies sources to the dest directory") {
+    from "src"
+    into "dest"
+    include '**/*.java'
+}
+
+/**
+ * Zip
+ * zip包路径：project.buildDir/distributions
+ */
+task zip(type: Zip, group: "Archive", description: "Archives sources in a zip file") {
+    from "src"
+    setArchiveName "basic-demo-1.0.zip"
+}
+
+
+
+
+
+
